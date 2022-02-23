@@ -35,7 +35,7 @@ void Main()
 											.ToList()
 							})
 							.ToList();
-	//albumlist.Dump();
+	albumlist.Dump();
 	
 	// typically if the albumlist was a var variable in your BLL method
 	// AND the method return datatype was a List<T>, one could, on the
@@ -222,7 +222,7 @@ void Main()
 						averagelength = x.Tracks.Average(tr => tr.Milliseconds)
 					}))
 		.OrderBy(a => a.totalTracks)
-		.Dump()
+		//.Dump()
 		;
 }
 
