@@ -1,6 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
+#region Additonal Namespaces
+using ChinookSystem.ViewModels;
+#endregion
+
 namespace WebApp.Pages.SamplePages
 {
     public class ControlsModel : PageModel
@@ -87,11 +91,5 @@ namespace WebApp.Pages.SamplePages
             return Page();
         }
 
-    }
-
-    public class SelectionList
-    {
-        public int ValueId { get; set; }
-        public string DisplayText { get; set; }
     }
 }
