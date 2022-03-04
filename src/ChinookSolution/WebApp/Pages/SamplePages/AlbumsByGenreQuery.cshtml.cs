@@ -55,8 +55,7 @@ namespace WebApp.Pages.SamplePages
         private const int PAGE_SIZE = 5;
         // instance for Paginator
         public Paginator Pager { get; set; }
-        // total rows in the complete query collection
-        public int TotalRows { get; set; }
+        
         #endregion
 
         // currentPage will appear on your Url as a Get Parameter value
@@ -79,11 +78,26 @@ namespace WebApp.Pages.SamplePages
                 int pageNumber = currentPage.HasValue ? currentPage.Value : 1;
                 // use the paginator to setup data needed for paging
                 PageState current = new(pageNumber, PAGE_SIZE);
+
+                // total rows in the complete query collection
+                int totalrows = 0;
+
                 // the RedirectToPage() causes a OnGet to execute
                 // obtain your raw data for your query
 
+                // for efficiency of data being transfered, we will pass the
+                //  current page number and the desired page size to the backend query
+                // the returned collection will only have the rows of the whole query
+                //  collection that will actually be shown (PAGE_SIZE or less)
+                // the total number of records for the whole query collection will be
+                //  returned as an out parameter. This value is need by the Paginator
+                //  to set up its display
+                AlbumsOfGenre = _albumServices.AlbumsByGenre((int)GenreId,
+                                            pageNumber, PAGE_SIZE, out totalrows);
 
-                AlbumsOfGenre = _albumServices.AlbumsByGenre((int)GenreId);
+                // once the query is complete, use the returned row count in instantizating
+                //  an instance of the Paginator
+                Pager = new Paginator(totalrows, current);
             }
         }
 
@@ -98,6 +112,13 @@ namespace WebApp.Pages.SamplePages
                 FeedBack = $"You selected genre id of {GenreId}";
             }
             return RedirectToPage(new { GenreId = GenreId}); // causes a Get request which will force OnGet() to execute
+        }
+
+        public IActionResult OnPostNew()
+        {
+            // Note: No pkey value is passed on this redirect because you are wanting to
+            //      create a NEW album
+            return RedirectToPage("/SamplePages/CRUDAlbum");
         }
     }
 }

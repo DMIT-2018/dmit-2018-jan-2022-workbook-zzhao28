@@ -38,6 +38,12 @@ namespace ChinookSystem
                 var context = serviceProvider.GetRequiredService<ChinookContext>();
                 return new AlbumServices(context);
             });
+            services.AddTransient<ArtistServices>((serviceProvider) =>
+            {
+                // retrieve the registered DbContext done in AddDbContext<>
+                var context = serviceProvider.GetRequiredService<ChinookContext>();
+                return new ArtistServices(context);
+            });
 
         }
     }
