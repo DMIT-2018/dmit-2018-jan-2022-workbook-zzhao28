@@ -29,7 +29,7 @@ namespace WebApp.Pages.SamplePages
         #region Messaging and Error Handling
         [TempData]
         public string FeedBackMessage { get; set; }
-        
+
         public string ErrorMessage { get; set; }
 
         //a get property that returns the result of the lamda action
@@ -48,7 +48,7 @@ namespace WebApp.Pages.SamplePages
         private const int PAGE_SIZE = 5;
         public Paginator Pager { get; set; }
         [BindProperty(SupportsGet = true)]
-        public int? currentpage { get; set; }   
+        public int? currentpage { get; set; }
         #endregion
 
         [BindProperty(SupportsGet = true)]
@@ -128,7 +128,7 @@ namespace WebApp.Pages.SamplePages
                 foreach (var error in ex.InnerExceptions)
                 {
                     ErrorDetails.Add(error.Message);
-                    
+
                 }
                 return Page();
             }
@@ -154,7 +154,7 @@ namespace WebApp.Pages.SamplePages
                     playlistname = playlistname.Trim()
                 });
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 ErrorMessage = GetInnerException(ex).Message;
                 return Page();
@@ -170,9 +170,14 @@ namespace WebApp.Pages.SamplePages
                 {
                     throw new Exception("You need to have a playlist select first. Enter a playlist name and Fetch");
                 }
-               
+
                 // Add the code to add a track via the service.
-                
+                // obtain your username from security
+                string username = USERNAME; // will change when security is implemented
+                // send data to the service
+                _playlisttrackServices.PlaylistTrack_AddTrack(playlistname.Trim(),
+                                username, addtrackid);
+
                 FeedBackMessage = "adding the track";
                 return RedirectToPage(new
                 {
@@ -183,7 +188,7 @@ namespace WebApp.Pages.SamplePages
             }
             catch (AggregateException ex)
             {
-                              
+
                 ErrorMessage = "Unable to process add track";
                 foreach (var error in ex.InnerExceptions)
                 {
@@ -203,14 +208,18 @@ namespace WebApp.Pages.SamplePages
 
                 return Page();
             }
-            
+
         }
 
         public IActionResult OnPostRemove()
         {
             try
             {
-               //Add the code to process the list of tracks via the service.
+                //Add the code to process the list of tracks via the service.
+                string username = USERNAME;
+                _playlisttrackServices.PlaylistTrack_RemoveTrack(playlistname.Trim(),
+                                username, cplaylistInfo);
+                FeedBackMessage = "Tracks have been removed";
 
                 return RedirectToPage(new
                 {
@@ -244,9 +253,52 @@ namespace WebApp.Pages.SamplePages
 
         }
 
+        public IActionResult OnPostReOrg()
+        {
+            try
+            {
+                //Add the code to process the list of tracks via the service.
+                string username = USERNAME;
+                _playlisttrackServices.PlaylistTrack_MoveTracks(playlistname.Trim(),
+                                username, cplaylistInfo);
+                FeedBackMessage = "Tracks have been reorganized";
+
+                return RedirectToPage(new
+                {
+                    searchBy = string.IsNullOrWhiteSpace(searchBy) ? " " : searchBy.Trim(),
+                    searchArg = string.IsNullOrWhiteSpace(searchArg) ? " " : searchArg.Trim(),
+                    playlistname = playlistname
+                });
+            }
+            catch (AggregateException ex)
+            {
+
+                ErrorMessage = "Unable to process remove tracks";
+                foreach (var error in ex.InnerExceptions)
+                {
+                    ErrorDetails.Add(error.Message);
+
+                }
+                GetTrackInfo();
+                GetPlaylist();
+
+                return Page();
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = GetInnerException(ex).Message;
+                GetTrackInfo();
+                GetPlaylist();
+
+                return Page();
+            }
+
+        }
+
+
         private Exception GetInnerException(Exception ex)
         {
-            while(ex.InnerException != null)
+            while (ex.InnerException != null)
                 ex = ex.InnerException;
             return ex;
         }
